@@ -1,0 +1,85 @@
+import UIKit
+
+class DeviceInformationViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        fetchDeviceInformation()
+    }
+    
+    func fetchDeviceInformation() {
+        let device = UIDevice.current
+        let modelName = device.model
+        let modelNumber = device.localizedModel
+        let iOSVersion = device.systemVersion
+        let serialNumber = getSerialNumber()
+        let storageSize = getStorageSize()
+        let batteryHealth = getBatteryHealth()
+        let batteryLevel = getBatteryLevel()
+        let cameraDetails = getCameraDetails()
+        let processorInfo = getProcessorInfo()
+        let gpuInfo = getGPUInfo()
+        let imei = getIMEI()
+        
+        print("Model Name: \(modelName), Model Number: \(modelNumber)")
+        print("iOS Version: \(iOSVersion)")
+        print("Serial Number: \(serialNumber)")
+        print("Storage Size: \(storageSize)")
+        print("Battery Health: \(batteryHealth)")
+        print("Battery Level: \(batteryLevel)")
+        print("Camera Details: \(cameraDetails)")
+        print("Processor Info: \(processorInfo)")
+        print("GPU Info: \(gpuInfo)")
+        print("IMEI: \(imei)")
+    }
+    
+    func getSerialNumber() -> String? {
+        var serialNumber: String?
+        if let uuid = UIDevice.current.identifierForVendor?.uuidString {
+            serialNumber = uuid
+        }
+        return serialNumber
+    }
+    
+    func getStorageSize() -> String {
+        if let totalSize = FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())[.systemSize] as? NSNumber {
+            return "\(totalSize.intValue / (1024 * 1024 * 1024)) GB"
+        }
+        return "N/A"
+    }
+    
+    func getBatteryHealth() -> String {
+        let batteryHealth = UIDevice.current.batteryHealth
+        return "\(batteryHealth * 100)%"
+    }
+    
+    func getBatteryLevel() -> String {
+        let batteryLevel = UIDevice.current.batteryLevel
+        return "\(batteryLevel * 100)%"
+    }
+    
+    func getCameraDetails() -> String {
+        return "N/A"
+    }
+    
+    func getProcessorInfo() -> String {
+        return "\(Sysctl.model())"
+    }
+    
+    func getGPUInfo() -> String {
+        return "N/A"
+    }
+    
+    func getIMEI() -> String {
+        return UIDevice.current.identifierForVendor?.uuidString ?? "N/A"
+    }
+}
+class Sysctl {
+    class func model() -> String {
+        var size: size_t = 0
+        sysctlbyname("hw.model", nil, &size, nil, 0)
+        var model = [CChar](repeating: 0, count: Int(size))
+        sysctlbyname("hw.model", &model, &size, nil, 0)
+        return String(cString: model)
+    }
+}
